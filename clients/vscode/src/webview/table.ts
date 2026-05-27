@@ -1,0 +1,60 @@
+import type { LedgerEntry } from "@budgetary/sdk";
+
+import { escapeHtml, formatTokens, truncateEstimateId } from "../format";
+
+function donelyCell(entry: LedgerEntry): string {
+  if (entry.actual === null) return "—";
+  return entry.actual.success ? "✓" : "✗";
+}
+
+function predictedCell(entry: LedgerEntry): string {
+  if (!entry.predicted) return "—";
+  return formatTokens(entry.predicted.p50);
+}
+
+function actualCell(entry: LedgerEntry): string {
+  if (entry.actual === null) return "—";
+  return formatTokens(entry.actual.total);
+}
+
+function row(entry: LedgerEntry): string {
+  const id = escapeHtml(truncateEstimateId(entry.estimateId, 12));
+  const scenario = escapeHtml(entry.scenario);
+  return `<tr>
+    <td class="b-cell-id">${id}</td>
+    <td class="b-cell-num">${predictedCell(entry)}</td>
+    <td class="b-cell-num">${actualCell(entry)}</td>
+    <td class="b-cell-scenario b-scenario-${escapeHtml(entry.scenario)}">${scenario}</td>
+    <td class="b-cell-done">${donelyCell(entry)}</td>
+  </tr>`;
+}
+
+export function renderRecentTable(entries: readonly LedgerEntry[]): string {
+  if (entries.length === 0) {
+    return `<p class="b-empty">No estimates yet.</p>`;
+  }
+
+  // Newest first by createdAt; entries already returned in this order from
+  // the API, but sort defensively in case of future changes.
+  const sorted = [...entries].sort((a, b) => {
+    const ta = Date.parse(a.createdAt);
+    const tb = Date.parse(b.createdAt);
+    if (Number.isFinite(ta) && Number.isFinite(tb)) return tb - ta;
+    return 0;
+  });
+
+  return `<table class="b-table">
+  <thead>
+    <tr>
+      <th>Estimate</th>
+      <th class="b-cell-num">Predicted p50</th>
+      <th class="b-cell-num">Actual</th>
+      <th>Scenario</th>
+      <th>Done</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${sorted.map(row).join("\n    ")}
+  </tbody>
+</table>`;
+}

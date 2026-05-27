@@ -2,6 +2,22 @@
 
 All notable changes to the Budgetary clients are tracked here. Newest first.
 
+## 0005 — VS Code dashboard extension
+
+- New `@budgetary/vscode` extension: command `Budgetary: Show Dashboard`
+  opens a webview with a calibration scatter plot (predicted p50 vs
+  actual total tokens, log-log) and a recent-estimates table.
+- Hand-written SVG chart, no external chart library; uses VS Code theme
+  colors via CSS variables so it matches the user's theme.
+- Reads the user's ledger via `/v1/ledger`; never writes anything to the
+  API.
+- API key resolution is shared with the Claude Code plugin
+  (`BUDGETARY_API_KEY` env → `~/.budgetary/config.json` → graceful
+  configure-key panel).
+- Strict webview CSP; no external resources; nonce-bound inline script.
+- Package version stays `0.0.0`; Marketplace + OpenVSX publishing wires
+  up in a later release.
+
 ## 0004 — Claude Code plugin
 
 - New `@budgetary/claude-code` plugin: provides a `/estimate <task>` slash command
