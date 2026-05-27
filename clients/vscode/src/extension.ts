@@ -1,7 +1,13 @@
 import * as vscode from "vscode";
 
-export function activate(_context: vscode.ExtensionContext) {
-  // Commands and views register in a later release.
+import { showDashboard } from "./commands/show_dashboard";
+
+export function activate(context: vscode.ExtensionContext): void {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("budgetary.showDashboard", () => {
+      showDashboard(context);
+    }),
+  );
 }
 
-export function deactivate() {}
+export function deactivate(): void {}
